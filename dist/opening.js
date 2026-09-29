@@ -1,5 +1,5 @@
 const body=document.body,main=document.querySelector('#main-site'),pause=document.querySelector('#pause-opening');
-const reduced=matchMedia('(prefers-reduced-motion: reduce)');const key='recont-opening-v7';let seen=false;try{seen=localStorage.getItem(key)==='seen'}catch{}
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');const key='recont-opening-v8';let seen=false;try{seen=localStorage.getItem(key)==='seen'}catch{}
 export const opening={elapsed:0,done:false,paused:false,progress:0,needsRender:true};
 export function finishOpening(focus=true){opening.done=true;opening.progress=.23;opening.elapsed=12;opening.needsRender=true;body.style.setProperty('--hero-reveal','1');body.classList.remove('opening');main.inert=false;main.style.removeProperty('--aperture');document.querySelector('#journey').inert=true;try{localStorage.setItem(key,'seen')}catch{}if(focus)document.querySelector('#main-title').focus({preventScroll:true});}
 function startOpening(){opening.elapsed=0;opening.progress=0;opening.needsRender=true;opening.done=false;opening.paused=false;pause.textContent='一時停止 Ⅱ';pause.setAttribute('aria-pressed','false');main.inert=true;body.classList.add('opening');body.style.setProperty('--hero-reveal','0');body.style.setProperty('--old-header','1');window.scrollTo(0,0);}
