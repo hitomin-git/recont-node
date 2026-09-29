@@ -1,0 +1,9 @@
+const body=document.body,main=document.querySelector('#main-site'),pause=document.querySelector('#pause-opening');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');const key='recont-opening-v1';let seen=false;try{seen=localStorage.getItem(key)==='seen'}catch{}
+export const opening={elapsed:0,done:false,paused:false,progress:0};
+export function finishOpening(focus=true){opening.done=true;body.classList.remove('opening');main.inert=false;main.style.removeProperty('--aperture');document.querySelector('#journey').inert=true;try{localStorage.setItem(key,'seen')}catch{}if(focus)document.querySelector('#main-title').focus({preventScroll:true});}
+function startOpening(){opening.elapsed=0;opening.progress=0;opening.done=false;opening.paused=false;pause.textContent='一時停止 Ⅱ';pause.setAttribute('aria-pressed','false');main.inert=true;body.classList.add('opening');main.style.setProperty('--aperture','0%');window.scrollTo(0,0);}
+document.querySelector('#skip-opening').onclick=()=>finishOpening();document.querySelector('#replay-opening').onclick=()=>{startOpening();document.querySelector('#skip-opening').focus()};pause.onclick=()=>{opening.paused=!opening.paused;pause.textContent=opening.paused?'再生 ▷':'一時停止 Ⅱ';pause.setAttribute('aria-pressed',String(opening.paused))};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!opening.done)finishOpening()});reduced.addEventListener('change',e=>{if(e.matches)finishOpening()});
+export function advanceOpening(dt){if(opening.done||opening.paused||document.hidden)return;opening.elapsed+=dt;const t=opening.elapsed;opening.progress=t<5?.035*(t/5):t<7?.035+(t-5)/2*.065:.1+Math.min(1,(t-7)/5)*.155;const reveal=Math.max(0,Math.min(1,(t-10.8)/1.2));main.style.setProperty('--aperture',(reveal*150)+'%');document.querySelector('#opening-progress').style.transform='scaleX('+Math.min(1,t/12)+')';if(t>=12)finishOpening();}
+if(seen||reduced.matches||location.hash){finishOpening(false)}else startOpening();

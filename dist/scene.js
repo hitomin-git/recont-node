@@ -1,3 +1,4 @@
+import {opening,advanceOpening,finishOpening} from './opening.js';
 import * as THREE from './three.module.min.js';
 const $=s=>document.querySelector(s), canvas=$('#ocean'), reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), smooth=(a,b,v)=>{const x=clamp((v-a)/(b-a));return x*x*(3-2*x)}, lerp=(a,b,t)=>a+(b-a)*t;
@@ -7,7 +8,7 @@ const chapterStart=[.10,.30,.50,.70],names=['Mayro','ゑむず','マッチポン
 const stops={start:0,recovery:.15,mayro:.265,ems:.465,match:.665,fourth:.865,surface:1,'discover-ems':.31,'discover-match':.51,'discover-fourth':.71};
 const toScroll=v=>v<=.1?v*2.2:.22+(v-.1)*.78/.9;
 function go(id){if(id in stops)scrollTo({top:toScroll(stops[id])*(document.documentElement.scrollHeight-innerHeight),behavior:reduced.matches?'instant':'smooth'})}
-document.querySelectorAll('a[href^="#"]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.hash.slice(1))});
+document.querySelectorAll('#journey a[href^="#"], .timeline a[href^="#"]').forEach(a=>a.onclick=e=>{e.preventDefault();go(a.hash.slice(1))});
 const worlds=[...document.querySelectorAll('.brand-world')];
 function syncText(focus,q,entry){const intro=1-smooth(.025,.085,p),end=smooth(.91,.96,p);$('#start').style.opacity=intro;$('#start').inert=intro<.1;$('#surface').style.opacity=end;$('#surface').inert=end<.1;$('#surface').style.visibility=end>.001?'visible':'hidden';
 const caption=smooth(.08,.17,q)*(1-smooth(.40,.51,q))*(p>.095&&p<.9?1:0);$('#discovery').style.opacity=caption;$('#discovery-name').textContent=names[focus];$('#discovery-count').textContent='0'+(focus+1)+' / DISCOVERY';
@@ -73,7 +74,7 @@ const num=mobile?650:1200,particleArray=new Float32Array(num*3),particleData=[];
 const streakGeo=new THREE.BufferGeometry();const streaksArray=new Float32Array(100*6);const streaks=new THREE.LineSegments(streakGeo,new THREE.LineBasicMaterial({color:0x7cbed1,transparent:true,opacity:0,depthWrite:false}));scene.add(streaks);streakGeo.setAttribute('position',new THREE.BufferAttribute(streaksArray,3));const streakData=Array.from({length:100},()=>[(rand()-.5)*28,(rand()-.5)*36,(rand()-.5)*18]);
 const bgMat=new THREE.ShaderMaterial({depthWrite:false,uniforms:{time:{value:0},rise:{value:0}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:`varying vec2 v;uniform float time;uniform float rise;void main(){float w=sin(v.y*9.+time*.15)*.015;float beams=pow(max(0.,sin((v.x+w)*47.+v.y*6.)),24.);float halo=exp(-length((v-vec2(.54,.98))*vec2(3.,1.6))*2.);vec3 c=mix(vec3(.002,.012,.025),vec3(.009,.055,.095),v.y);c+=vec3(.025,.18,.23)*halo*(.6+rise*2.);c+=vec3(.1,.3,.35)*beams*pow(v.y,2.)*(.12+rise*.45);c+=vec3(.07,.17,.2)*pow(rise,5.)*v.y;gl_FragColor=vec4(c,1.);}`});const bg=new THREE.Mesh(new THREE.PlaneGeometry(155,115),bgMat);bg.position.z=-48;scene.add(bg);
 const beamMat=new THREE.MeshBasicMaterial({color:0x81e8ef,transparent:true,opacity:.018,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});for(let i=0;i<4;i++){const beam=new THREE.Mesh(new THREE.ConeGeometry(3+i*.7,45,20,1,true),beamMat);beam.position.set(-6+i*4,15,-10-i*2);beam.rotation.z=-.16+i*.06;scene.add(beam)}
-const look=new THREE.Vector3();function resize(){mobile=innerWidth<700;renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();readScroll()}resize();addEventListener('resize',resize);function readScroll(){const scroll=clamp(scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight));target=scroll<=.22?scroll/2.2:.1+(scroll-.22)*.9/.78}addEventListener('scroll',readScroll,{passive:true});readScroll();
+const look=new THREE.Vector3();function resize(){mobile=innerWidth<700;renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();readScroll()}resize();addEventListener('resize',resize);function readScroll(){}addEventListener('scroll',readScroll,{passive:true});readScroll();
 
 const nextStone=new THREE.Mesh(rockGeometry(4),rockMaterial(0xafdccc));scene.add(nextStone);
 const nextLight=new THREE.PointLight(0x8dffe9,0,12,1.2);scene.add(nextLight);
@@ -81,7 +82,7 @@ const nextLight=new THREE.PointLight(0x8dffe9,0,12,1.2);scene.add(nextLight);
 // Each chapter has its own approach, abrasion, entrance and interior hold.
 seabed.visible=false;bg.visible=false;blast.visible=false;scene.children.filter(o=>o.isMesh&&o.geometry?.type==='ConeGeometry').forEach(o=>o.visible=false);
 const horizon=$('#abyss'),veil=$('#transition-veil');
-function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;if(!paused)time+=dt;p=lerp(p,target,reduced.matches?1:1-Math.exp(-dt*7));
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;advanceOpening(dt);if(opening.done)return;if(opening.elapsed<.1){p=0;time=0}if(!opening.paused&&!document.hidden)time+=dt;target=opening.progress;p=lerp(p,target,reduced.matches?1:1-Math.exp(-dt*7));
 const focus=clamp(Math.floor((p-.1)/.2),0,3),q=clamp((p-chapterStart[focus])/.2),approach=smooth(0,.32,q),polish=smooth(.25,.49,q),entry=smooth(.50,.76,q),exit=smooth(.95,1,q),ending=smooth(.90,.99,p);const stormPower=smooth(.13,.26,q)*(1-smooth(.40,.55,q))*(p>=.1&&p<.9?1:0);
 const intro=1-smooth(.07,.1,p);const drifting=[[3,-.1,1],[-.5,2,-8],[5.5,2.3,-5],[-3.7,-1,-4]];nodes.forEach((mesh,i)=>{const selected=i===focus;mesh.visible=p<.90&&(selected||intro>.01);mesh.position.set(selected?0:(i-1.5)*4,selected?lerp(-1.9,0,approach):-.7,selected?0:-8);const drift=drifting[i];mesh.position.lerp(new THREE.Vector3(drift[0]+Math.sin(time*.21+i)*.16,drift[1]+Math.sin(time*.32+i*1.6)*.23,drift[2]),intro);mesh.scale.setScalar(lerp(selected?1:.35,[.93,.60,.78,.56][i],intro));mesh.rotation.set(lerp(.28,0,polish),lerp(-.65+i*.14,0,polish),lerp(-.15,0,polish));mesh.rotation.y+=Math.sin(time*.24+i)*(.025+intro*.15)*(1-entry);mesh.rotation.z+=Math.sin(time*.19+i)*intro*.07;mesh.position.x+=Math.sin(time*4+i)*.075*stormPower;const {crust,gem,plate,edges,polishUniform,sparks}=mesh.userData;polishUniform.value=selected?polish*.92:0;crust.visible=entry<.85;crust.scale.set(1,1,.7);gem.visible=selected&&polish>.08;gem.material.emissiveIntensity=.1+polish*.6;plate.visible=false;edges.visible=false;sparks.visible=false;sparks.material.uniforms.strength.value=.9;sparks.material.uniforms.lightTime.value=time*.7+i;nodeLights[i].intensity=selected?1+polish*3:1;nodeLights[i].position.copy(mesh.position);nodeLights[i].position.z+=.8;});
 for(const vortex of [storm,clouds]){vortex.visible=stormPower>.005;vortex.position.set(0,-.2,0);vortex.scale.set(.60,.48,.5);vortex.rotation.z=-.55;vortex.material.uniforms.time.value=time;vortex.material.uniforms.scroll.value=q;vortex.material.uniforms.strength.value=stormPower*(vortex===clouds?.7:1);}
@@ -93,7 +94,7 @@ if(p<.1){camera.position.set(lerp(2.7,-.8,intro),lerp(2,1.5,intro),lerp(mobile?1
 horizon.style.transform='scale('+(1+approach*.17+entry*.35)+') translateX('+(-focus*1.5)+'%)';horizon.style.opacity=1-entry*.7;veil.style.opacity=p>=.1&&p<.9?Math.max(exit,1-smooth(0,.045,q)):0;
 syncText(focus,q,entry);renderer.render(scene,camera);}requestAnimationFrame(animate);
 
-}catch(error){$('#fallback').hidden=false;button.hidden=true;$('#start').classList.add('active');$('#start').style.opacity=1;console.error(error)}
+}catch(error){finishOpening(false);document.querySelector("#replay-opening").hidden=true;$('#fallback').hidden=true;button.hidden=true;$('#start').classList.add('active');$('#start').style.opacity=1;console.error(error)}
 
 
 
