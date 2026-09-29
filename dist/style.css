@@ -16,3 +16,5 @@ html,body{overflow-x:clip}#ocean{width:100%!important;max-width:100%}
 
 /* Supplied Recont Node wordmark is the destination of the opening. */
 #node-signature{width:clamp(290px,36vw,483px);transform:translate(-50%,-50%) scale(var(--logo-scale,1));mix-blend-mode:screen;will-change:transform,opacity}#node-signature img{display:block;width:100%;height:auto;mask-image:radial-gradient(ellipse at center,#000 42%,transparent 74%)}.wordmark{display:block;width:150px;height:auto;mix-blend-mode:screen;mask-image:radial-gradient(ellipse at center,#000 42%,transparent 75%)}.site-footer .wordmark{width:210px}@media(max-width:700px){#node-signature{width:290px}.wordmark{width:112px}.site-nav{height:90px}.site-footer .wordmark{width:175px}}
+
+#node-signature{width:clamp(400px,48vw,680px)}.wordmark{width:180px}@media(max-width:700px){#node-signature{width:min(390px,96vw)}.wordmark{width:130px}}
