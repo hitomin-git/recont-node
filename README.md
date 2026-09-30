@@ -2,7 +2,9 @@
 
 深海の原石から4つのブランドの輝きへつながる、Recont Nodeのコーポレートサイトです。
 
-公開サイト: https://ricont-deep-sea-0925.hitomin-toke.chatgpt.site/
+公開サイト: https://hitomin-git.github.io/recont-node/
+
+従来のSites版: https://ricont-deep-sea-0925.hitomin-toke.chatgpt.site/
 
 ## ローカルで見る
 
@@ -19,7 +21,8 @@ python -m http.server 4173 --directory dist
 - `dist/scene.js`: Three.jsによる海中・原石の描画
 - `dist/opening.js`: オープニングの進行
 - `dist/philosophy.js`, `dist/brands.js`: スクロール演出
-- `.openai/hosting.json`: Sites公開先の設定（認証情報は含みません）
+- `.github/workflows/static.yml`: GitHub Pagesへの自動公開
+- `.openai/hosting.json`: 従来のSites公開先設定（認証情報は含みません）
 
 ## 掲載情報の出典
 
@@ -32,5 +35,6 @@ python -m http.server 4173 --directory dist
 
 ## 公開・素材について
 
-ホスティングはSitesを使用しています。GitHubへのpushだけでは本番サイトは更新されません。
+`main`へのpushでGitHub Actionsが`dist`をGitHub Pagesへ自動公開します。手動公開はActionsの「Deploy Recont Node to Pages」から実行できます。従来のSites版は別管理で、GitHubへのpushでは更新されません。
+
 ロゴ・店舗名・画像等の素材の権利は各権利者に帰属します。リポジトリの公開は素材の自由利用を許諾するものではありません。
